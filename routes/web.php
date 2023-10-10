@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/orders', function () {
+    DB::enableQueryLog();
+    try {
+        request()->validate([
+            'products' =>  ['required', 'array'],
+            'products.*.id' =>  ['required', Rule::exists('products', 'id')],
+        ]);
+        return DB::getQueryLog();
+    } catch (Exception $e) {
+        return $e->getMessage();
+    }
 });
